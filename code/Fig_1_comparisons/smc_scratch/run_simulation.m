@@ -137,6 +137,15 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
     assignin('base','teamB_detections',detections);
     assignin('base','teamB_detection_map',detection_map);
 
+    % Difference between estimated map and team A map.
+    if teamB_strategy == 3
+        map_diff = detection_map(:) - opt.teamA.map;
+        detection_error = sum((map_diff(:)).^2);
+        fprintf('Detection error (Team A estimated map vs TeamA map): %e \n', detection_error);
+        assignin('base','detection_error',detection_error);
+    end
+
+
     % Compare original and updated Team B map if strategy 3 used
     if teamB_strategy == 3
         figure(3); set(gcf,'color','w');
