@@ -26,7 +26,7 @@ function [poses, opt] = initialize_multiagent()
     poses.y = [20,40,125];
     poses.theta = 120*pi/180*ones(opt.nagents,1);
 
-    opt.sim.Nsteps =10000;
+    opt.sim.Nsteps =1000;
     opt.sim.dt = 0.1;
 
     opt.erg.s = 1.5;

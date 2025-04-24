@@ -40,8 +40,10 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
                 if erg_flags(i)
                     for j = opt.teamB.idx
                         if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), visibility_range)
-                            erg_flags(i) = false;
+                            % order of false and true matters matters.
                             new_erg = find_idle_ergodic(erg_flags(opt.teamA.idx));
+                            disp(new_erg)
+                            erg_flags(i) = false;
                             if ~isempty(new_erg)
                                 erg_flags(opt.teamA.idx(new_erg)) = true;
                             end
@@ -55,7 +57,7 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
                     poses = apply_random_step(poses, i, opt);
                 end
 
-            elseif ~isTeamA && (strategy == 1 || strategy == 2)
+            elseif ~isTeamA && (strategy == 1 || strategy == 2 || strategy == 3)
                 visible_a = [];
                 for j = opt.teamA.idx
                     if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), visibility_range)
@@ -67,9 +69,16 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
                 if ~isempty(visible_a)
                     inds = knnsearch(opt.kdOBJ, visible_a);
                     detection_map(inds) = detection_map(inds) + 1;
+
+                    if strategy == 3
+                        % Team B uses detected points to update its own info map
+                        for idx = inds'
+                            opt.teamB.map(idx) = opt.teamB.map(idx) + 1;
+                        end
+                    end
                 end
 
-                if strategy == 2 && ~isempty(visible_a)
+                if (strategy == 2 || strategy == 3) && ~isempty(visible_a)
                     tx = visible_a(1,1);
                     ty = visible_a(1,2);
                     [poses.x(i), poses.y(i), poses.theta(i)] = pursue_target(poses.x(i), poses.y(i), poses.theta(i), tx, ty, opt, i);
@@ -81,7 +90,11 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
                 if strategy == 1
                     poses = apply_ergodic_step(poses, i, time, opt, isTeamA);
                 else
-                    poses = apply_random_step(poses, i, opt);
+                    if erg_flags(i)
+                        poses = apply_ergodic_step(poses, i, time, opt, true);
+                    else
+                        poses = apply_random_step(poses, i, opt);
+                    end
                 end
             end
 
@@ -108,10 +121,33 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
 
     detection_map = detection_map / sum(detection_map(:));
 
+    % Normalize updated teamB map if strategy 3 was used
+    if teamB_strategy == 3
+        opt.teamB.map = opt.teamB.map / sum(opt.teamB.map(:));
+    end
+
     figure(2); set(gcf,'color','w');
     surface(X,Y,zeros(size(X)),detection_map,'FaceColor','interp','EdgeColor','none');
     axis tight; axis equal; title('Team B Detection Heatmap'); colorbar;
 
+    figure(3); set(gcf,'color','w');
+    surface(X,Y,zeros(size(X)),reshape(opt.teamB.original_map,size(X)),'FaceColor','interp','EdgeColor','none');
+    title('Original Team B Map'); axis equal; colorbar;
+
     assignin('base','teamB_detections',detections);
     assignin('base','teamB_detection_map',detection_map);
+
+    % Compare original and updated Team B map if strategy 3 used
+    if teamB_strategy == 3
+        figure(3); set(gcf,'color','w');
+        subplot(1,2,1);
+        surface(X,Y,zeros(size(X)),reshape(opt.teamB.original_map,size(X)),...
+                'FaceColor','interp','EdgeColor','none');
+        title('Original Team B Map'); axis equal; colorbar;
+
+        subplot(1,2,2);
+        surface(X,Y,zeros(size(X)),reshape(opt.teamB.map,size(X)),...
+                'FaceColor','interp','EdgeColor','none');
+        title('Updated Team B Map'); axis equal; colorbar;
+    end
 end
