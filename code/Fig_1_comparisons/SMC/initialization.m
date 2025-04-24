@@ -16,7 +16,7 @@ opt.L = [Lx;Ly];
 %% Agents params: Velocity Bounds, number of agents... 
 
 % number of agents
-opt.nagents = 1;
+opt.nagents = 3;
 
 % forward velocity lower bound
 if ~isfield(opt, 'vlb')
@@ -60,7 +60,7 @@ opt.erg.HK=[];% normalizer of fourier basis functions, will ber assigned in GetF
 opt.erg.muk=[];
 
 %% simulation params
-opt.sim.Nsteps = 10000;
+opt.sim.Nsteps = 300;
 opt.sim.dt = 0.1;
 
 end
