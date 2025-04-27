@@ -41,16 +41,39 @@ function poses = apply_ergodic_step(poses, i, time, opt, isTeamA)
     end
 
 
+    if(abs(w) < 1e-10 )
+        new_x = poses.x(i) + v*dt*cos(poses.theta(i));   
+        new_y = poses.y(i) + v*dt*sin(poses.theta(i));
+    else
+        new_x = poses.x(i) + v/w*(sin(poses.theta(i) + w*dt) - sin(poses.theta(i)));   
+        new_y = poses.y(i) + v/w*(cos(poses.theta(i)) - cos(poses.theta(i)+ w*dt));    
+    end
+    
+        % Reflect the agent if it hits domain boundary
+    if new_x < opt.DomainBounds.xmin || new_x > opt.DomainBounds.xmax
+        poses.theta(i) = pi - poses.theta(i); % reflect horizontally
+        new_x = poses.x(i); % don't move out
+    end
+    if new_y < opt.DomainBounds.ymin || new_y > opt.DomainBounds.ymax
+        poses.theta(i) = -poses.theta(i); % reflect vertically
+        new_y = poses.y(i); % don't move out
+    end
+
+    poses.theta(i) = poses.theta(i) + w * dt;
+     % Update position
+    poses.x(i) = new_x;
+    poses.y(i) = new_y;
+
 
      %velocity motion model
-    if(abs(w) < 1e-10 )
-        poses.x(i) = poses.x(i) + v*dt*cos(poses.theta(i));   
-        poses.y(i) = poses.y(i) + v*dt*sin(poses.theta(i));
-    else
-        poses.x(i) = poses.x(i) + v/w*(sin(poses.theta(i) + w*dt) - sin(poses.theta(i)));   
-        poses.y(i) = poses.y(i) + v/w*(cos(poses.theta(i)) - cos(poses.theta(i)+ w*dt));    
-    end
-    poses.theta(i) = poses.theta(i) + w * dt;
+    % if(abs(w) < 1e-10 )
+    %     poses.x(i) = poses.x(i) + v*dt*cos(poses.theta(i));   
+    %     poses.y(i) = poses.y(i) + v*dt*sin(poses.theta(i));
+    % else
+    %     poses.x(i) = poses.x(i) + v/w*(sin(poses.theta(i) + w*dt) - sin(poses.theta(i)));   
+    %     poses.y(i) = poses.y(i) + v/w*(cos(poses.theta(i)) - cos(poses.theta(i)+ w*dt));    
+    % end
+    % poses.theta(i) = poses.theta(i) + w * dt;
     % poses.x(i) = poses.x(i) + v * cos(poses.theta(i)) * dt;
     % poses.y(i) = poses.y(i) + v * sin(poses.theta(i)) * dt;
 end
