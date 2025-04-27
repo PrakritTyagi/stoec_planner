@@ -33,11 +33,24 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
             strategy = teamA_strategy * isTeamA + teamB_strategy * ~isTeamA;
             
             % Update Ck
-            xrel = poses.x(i) - opt.DomainBounds.xmin;
-            yrel = poses.y(i) - opt.DomainBounds.ymin;
-            HK = isTeamA * opt.teamA.HK + ~isTeamA * opt.teamB.HK;
-            Ck_update = cos(opt.erg.KX * pi * xrel / opt.L(1)) .* cos(opt.erg.KY * pi * yrel / opt.L(2)) * dt ./ HK';
-
+            if isTeamA
+                if erg_flags(i)
+                    xrel = poses.x(i) - opt.DomainBounds.xmin;
+                    yrel = poses.y(i) - opt.DomainBounds.ymin;
+                    HK = isTeamA * opt.teamA.HK + ~isTeamA * opt.teamB.HK;
+                    Ck_update = cos(opt.erg.KX * pi * xrel / opt.L(1)) .* cos(opt.erg.KY * pi * yrel / opt.L(2)) * dt ./ HK';
+                else    
+                    Ck_update = 0;
+                    disp(Ck_update)
+                end
+            else
+                xrel = poses.x(i) - opt.DomainBounds.xmin;
+                yrel = poses.y(i) - opt.DomainBounds.ymin;
+                HK = isTeamA * opt.teamA.HK + ~isTeamA * opt.teamB.HK;
+                Ck_update = cos(opt.erg.KX * pi * xrel / opt.L(1)) .* cos(opt.erg.KY * pi * yrel / opt.L(2)) * dt ./ HK';
+            end
+            
+            
             if isTeamA
                 opt.Ck_teamA = opt.Ck_teamA + Ck_update;
             else
@@ -50,7 +63,6 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
                         if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), opt.visibility_range)
                             % order of false and true matters matters.
                             new_erg = find_idle_ergodic(erg_flags(opt.teamA.idx));
-                            disp(new_erg)
                             erg_flags(i) = false;
                             if ~isempty(new_erg)
                                 erg_flags(opt.teamA.idx(new_erg)) = true;
