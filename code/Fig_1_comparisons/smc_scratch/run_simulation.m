@@ -2,7 +2,6 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
     Nsteps = opt.sim.Nsteps;
     dt = opt.sim.dt;
     traj = zeros(Nsteps, opt.nagents, 3);
-    visibility_range = 20.0;
     erg_flags = false(opt.nagents,1);
     detections = cell(opt.nagents, 1);
     detection_map = zeros(size(X));
