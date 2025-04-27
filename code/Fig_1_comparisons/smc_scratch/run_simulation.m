@@ -38,7 +38,7 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
             if isTeamA && strategy == 3
                 if erg_flags(i)
                     for j = opt.teamB.idx
-                        if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), visibility_range)
+                        if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), opt.visibility_range)
                             % order of false and true matters matters.
                             new_erg = find_idle_ergodic(erg_flags(opt.teamA.idx));
                             disp(new_erg)
@@ -59,7 +59,7 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
             elseif ~isTeamA && (strategy == 1 || strategy == 2 || strategy == 3)
                 visible_a = [];
                 for j = opt.teamA.idx
-                    if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), visibility_range)
+                    if is_agent_visible(poses.x(i), poses.y(i), poses.x(j), poses.y(j), opt.visibility_range)
                         visible_a = [visible_a; poses.x(j), poses.y(j)];
                     end
                 end
