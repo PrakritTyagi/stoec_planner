@@ -13,7 +13,7 @@ function [ErgA, ErgB] = run_simulation(poses, opt, teamA_strategy, teamB_strateg
     surface(X,Y,zeros(size(X)),reshape(opt.teamA.map,size(X)),'FaceColor','interp','EdgeColor','none');
     axis tight; axis equal; title('Multiagent Simulation');
 
-    scatter(poses.x(opt.teamA.idx), poses.y(opt.teamA.idx), 120, 'bo', 'filled', 'DisplayName', 'Team A');
+    scatter(poses.x(opt.teamA.idx), poses.y(opt.teamA.idx), 120, 'go', 'filled', 'DisplayName', 'Team A');
     scatter(poses.x(opt.teamB.idx), poses.y(opt.teamB.idx), 120, 'rs', 'filled', 'DisplayName', 'Team B');
 
     erg_flags(opt.teamA.idx(1)) = true;
