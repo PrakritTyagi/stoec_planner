@@ -21,7 +21,7 @@ opt.kdOBJ = KDTreeSearcher([X(:),Y(:)]);
 
 % Assign team strategies
 teamA_strategy = 3; % 1 / 2 / 3
-teamB_strategy = 3; % 1 / 2 / 3
+teamB_strategy = 2; % 1 / 2 / 3
 
 %% Initialize cooperative Fourier coefficients for teams
 opt.Ck_teamA = zeros(opt.erg.Nkx, opt.erg.Nky);
@@ -31,6 +31,7 @@ opt.Ck_teamB = zeros(opt.erg.Nkx, opt.erg.Nky);
 [ErgA, ErgB] = run_simulation(init_poses, opt, teamA_strategy, teamB_strategy, X, Y);
 
 fprintf('Erodicity of team A : %e \n',ErgA(end))
+fprintf('Bhattacharyya distance: %e\n',bhatt_distance(end))
 %% Plot ergodicity metrics over time
 timeVec = (1:length(ErgA)) * opt.sim.dt;
 figure; plot(timeVec, ErgA, 'b', 'LineWidth', 1.5); hold on;
@@ -38,3 +39,9 @@ plot(timeVec, ErgB, 'r', 'LineWidth', 1.5);
 legend('Team A', 'Team B');
 xlabel('Time (s)'); ylabel('Ergodicity Metric');
 title('Ergodicity Metric Over Time'); grid on;
+
+%% Plot Bhattacharyya distance over time
+timeVec = (1:length(bhatt_distance)) * opt.sim.dt;
+figure; plot(timeVec, bhatt_distance, 'b', 'LineWidth', 1.5);
+xlabel('Time (s)'); ylabel('Bhattacharyya distance ');
+title('Bhattacharyya distance between estimated team A map and team A map'); grid on;
